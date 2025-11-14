@@ -1,3 +1,6 @@
+// screens/RegisterScreen.js
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { doc, getFirestore, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
@@ -7,10 +10,10 @@ import { app } from '../config/firebase';
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-export default function RegisterScreen({ navigation }) {
+export default function RegisterScreen() { 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user'); // default role = user
+  const router = useRouter();
 
   const handleRegister = async () => {
     if (!email || !password) {
@@ -19,32 +22,29 @@ export default function RegisterScreen({ navigation }) {
     }
 
     try {
-      // Create user with Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Assign a role based on email or domain (you can customize this)
+      // decide role
       let assignedRole = 'user';
       if (email === 'admin@example.com') assignedRole = 'admin';
       else if (email === 'superadmin@example.com') assignedRole = 'superadmin';
 
-      // Store user info in Firestore
+      const role = assignedRole.trim().toLowerCase();
+
       await setDoc(doc(db, 'users', user.uid), {
-        email: email,
-        role: assignedRole,
+        email,
+        role,
       });
 
-      Alert.alert('Success', `Account created as ${assignedRole}!`);
+      // 🔹 keep AsyncStorage in sync with AppNavigator
+      await AsyncStorage.setItem('userRole', role);
+      await AsyncStorage.setItem('isLoggedIn', 'true');
 
-      // Redirect based on role
-      if (assignedRole === 'admin') {
-        navigation.replace('AdminHome');
-      } else if (assignedRole === 'superadmin') {
-        navigation.replace('SuperAdminHome');
-      } else {
-        navigation.replace('UserHome');
-      }
+      Alert.alert('Success', `Account created as ${role}!`);
 
+      // 🔹 let AppNavigator decide where to send them
+      router.replace("/appnavigator");
     } catch (error) {
       Alert.alert('Registration Failed', error.message);
     }
@@ -73,7 +73,7 @@ export default function RegisterScreen({ navigation }) {
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('loginpage')}>
+      <TouchableOpacity onPress={() => router.push('/loginpage')}>
         <Text style={styles.link}>Already have an account? Sign in</Text>
       </TouchableOpacity>
     </View>

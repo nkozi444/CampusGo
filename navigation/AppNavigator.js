@@ -1,6 +1,7 @@
+// navigation/AppNavigator.js
+import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Redirect } from "expo-router";
-import { useEffect, useState } from "react";
 
 export default function AppNavigator() {
   const [role, setRole] = useState(null);
@@ -8,31 +9,43 @@ export default function AppNavigator() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadUserData = async () => {
+    let cancelled = false;
+
+    (async () => {
       try {
         const storedRole = await AsyncStorage.getItem("userRole");
         const loggedIn = await AsyncStorage.getItem("isLoggedIn");
 
-        if (loggedIn === "true") setIsLoggedIn(true);
-        if (storedRole) setRole(storedRole);
-      } catch (error) {
-        console.error("Failed to load user data:", error);
+        if (cancelled) return;
+
+        const normalizedRole = storedRole ? storedRole.trim().toLowerCase() : null;
+
+        console.log("AppNavigator -> loaded from AsyncStorage:", {
+          storedRole,
+          normalizedRole,
+          loggedIn,
+        });
+
+        setIsLoggedIn(loggedIn === "true");
+        setRole(normalizedRole);
+      } catch (e) {
+        console.error("Failed to load user data:", e);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
+    })();
+
+    return () => {
+      cancelled = true;
     };
-    loadUserData();
   }, []);
 
   if (loading) return null;
 
-// Handles auto-redirect based on role
-if (isLoggedIn && role === "superadmin") return <Redirect href="/superadminhome" />;
-if (isLoggedIn && role === "admin") return <Redirect href="/adminhome" />;
-if (isLoggedIn && role === "user") return <Redirect href="/user" />;
-return <Redirect href="/" />;
+  if (isLoggedIn && role === "superadmin") return <Redirect href="/superadminhome" />;
+  if (isLoggedIn && role === "admin")      return <Redirect href="/adminhome" />;
+  if (isLoggedIn && role === "user")       return <Redirect href="/user" />;
 
-
-  // 💤 Not logged in → go to landing page
-  return <Redirect href="/" />;
+  // If we get here, we’re either logged out or role is missing
+  return <Redirect href="/loginpage" />;
 }
