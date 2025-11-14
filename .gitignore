@@ -41,3 +41,21 @@ app-example
 # generated native folders
 /ios
 /android
+
+# dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Expo / React Native
+.expo/
+.expo-shared/
+dist/
+web-build/
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
