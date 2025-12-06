@@ -14,16 +14,18 @@ import {
 } from "react-native";
 
 const { height, width } = Dimensions.get("window");
+const WIDE = width >= 920;
+
 const PRIMARY_COLOR = "#005FB8";
 const ACCENT_COLOR = "#10B981";
 const BACKGROUND_COLOR = "#F0F4F8";
 const NAVBAR_HEIGHT = 70; // keep in sync with styles.navbar.height
-const NAVBAR_MARGIN = 8;   // small extra gap when snapping to a section
+const NAVBAR_MARGIN = 8; // small extra gap when snapping to a section
 
 export default function HomeScreen() {
   const router = useRouter();
 
-  // Section refs (optional—but nice to keep for debugging)
+  // Section refs
   const aboutRef = useRef(null);
   const servicesRef = useRef(null);
   const announcementsRef = useRef(null);
@@ -32,7 +34,7 @@ export default function HomeScreen() {
   // ScrollView ref
   const scrollViewRef = useRef(null);
 
-  // Store section Y positions measured via onLayout (most cross-platform stable)
+  // Section Y positions (for smooth scroll)
   const sectionY = useRef({
     about: 0,
     services: 0,
@@ -51,34 +53,68 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {/* 🌐 Navigation Bar */}
       <View style={styles.navbar}>
-        <Image
-          source={require("../assets/images/logo.png")}
-          style={styles.navLogo}
-          resizeMode="contain"
-        />
-        <Text style={styles.navTitle}>CampusGo</Text>
-
-        <View style={styles.navLinks}>
-          <TouchableOpacity onPress={() => scrollToKey("about")}>
-            <Text style={styles.navLink}>About</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => scrollToKey("services")}>
-            <Text style={styles.navLink}>Services</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => scrollToKey("announcements")}>
-            <Text style={styles.navLink}>Announcements</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => scrollToKey("contact")}>
-            <Text style={styles.navLink}>Contact</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navButton}
-            onPress={() => router.push("/loginpage")}
-          >
-            <Text style={styles.navButtonText}>Login</Text>
-          </TouchableOpacity>
+        {/* LEFT: logo + CampusGo together */}
+        <View style={styles.navLeft}>
+          <Image
+            source={require("../assets/images/logo.png")}
+            style={styles.navLogo}
+            resizeMode="contain"
+          />
+          <Text style={styles.navTitle}>CampusGo</Text>
         </View>
+
+        {/* RIGHT: wide vs mobile */}
+        {WIDE ? (
+          <View style={styles.navLinksWide}>
+            <TouchableOpacity onPress={() => scrollToKey("about")}>
+              <Text style={styles.navLink}>About</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => scrollToKey("services")}>
+              <Text style={styles.navLink}>Services</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => scrollToKey("announcements")}>
+              <Text style={styles.navLink}>Announcements</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => scrollToKey("contact")}>
+              <Text style={styles.navLink}>Contact</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => router.push("/loginpage")}
+            >
+              <Text style={styles.navButtonText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          // MOBILE: whole right side scrolls horizontally (links + Login)
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.navRightScroll}
+          >
+            <TouchableOpacity onPress={() => scrollToKey("about")}>
+              <Text style={styles.navLink}>About</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => scrollToKey("services")}>
+              <Text style={styles.navLink}>Services</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => scrollToKey("announcements")}>
+              <Text style={styles.navLink}>Announcements</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => scrollToKey("contact")}>
+              <Text style={styles.navLink}>Contact</Text>
+            </TouchableOpacity>
+
+            {/* Login is now part of the scrollable row, so it can't be clipped */}
+            <TouchableOpacity
+              style={[styles.navButton, { marginLeft: 8 }]}
+              onPress={() => router.push("/loginpage")}
+            >
+              <Text style={styles.navButtonText}>Login</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        )}
       </View>
 
       {/* 📜 Main Scrollable Content */}
@@ -131,7 +167,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* 💬 Vision (kept under About) */}
+        {/* 💬 Vision */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.icon}>{"\u25BA"}</Text>
@@ -140,8 +176,8 @@ export default function HomeScreen() {
           <View style={styles.infoCard}>
             <Text style={styles.paragraph}>
               To be the digital backbone of the NORSU experience, making campus
-              mobility and essential administrative processes so seamless, reliable,
-              and swift that campus life moves forward without limits.
+              mobility and essential administrative processes so seamless,
+              reliable, and swift that campus life moves forward without limits.
             </Text>
           </View>
         </View>
@@ -171,7 +207,9 @@ export default function HomeScreen() {
 
             <TouchableOpacity style={[styles.card, styles.greenCard]}>
               <Text style={styles.cardIcon}>{"\u270F"}</Text>
-              <Text style={styles.cardTitle}>Submit a Form / Request Documents</Text>
+              <Text style={styles.cardTitle}>
+                Submit a Form / Request Documents
+              </Text>
               <Text style={styles.cardText}>
                 Submit, track, and manage transportation or administrative forms
                 online.
@@ -204,7 +242,9 @@ export default function HomeScreen() {
 
           <View style={styles.cardGrid}>
             <View style={[styles.card, styles.orangeCard]}>
-              <Text style={styles.cardTag}>{"\u26A0\uFE0F"} SCHEDULED ALERT</Text>
+              <Text style={styles.cardTag}>
+                {"\u26A0\uFE0F"} SCHEDULED ALERT
+              </Text>
               <Text style={styles.cardTitle}>System Maintenance</Text>
               <Text style={styles.cardText}>
                 CampusGo will undergo scheduled maintenance on October 15 from
@@ -223,7 +263,9 @@ export default function HomeScreen() {
             </View>
 
             <View style={[styles.card, styles.blueCard]}>
-              <Text style={styles.cardTag}>{"\u2139\uFE0F"} IMPORTANT NOTICE</Text>
+              <Text style={styles.cardTag}>
+                {"\u2139\uFE0F"} IMPORTANT NOTICE
+              </Text>
               <Text style={styles.cardTitle}>Holiday Schedule</Text>
               <Text style={styles.cardText}>
                 Please be advised of special operating hours for campus
@@ -231,6 +273,23 @@ export default function HomeScreen() {
                 holiday break, from Dec 20-Jan 5.
               </Text>
             </View>
+          </View>
+        </View>
+
+        {/* 🔐 Extra Login CTA BEFORE Contact */}
+        <View style={styles.section}>
+          <View style={styles.loginCtaCard}>
+            <Text style={styles.loginCtaTitle}>Ready to book a ride?</Text>
+            <Text style={styles.loginCtaText}>
+              Log in to CampusGo to request transportation, track approvals,
+              and view your upcoming trips.
+            </Text>
+            <TouchableOpacity
+              style={styles.loginCtaButton}
+              onPress={() => router.push("/loginpage")}
+            >
+              <Text style={styles.loginCtaButtonText}>Login to CampusGo</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -253,7 +312,9 @@ export default function HomeScreen() {
               <Text style={styles.contactTitle}>Support Email</Text>
               <Text
                 style={styles.contactText}
-                onPress={() => Linking.openURL("mailto:support@campusgo.edu")}
+                onPress={() =>
+                  Linking.openURL("mailto:support@campusgo.edu")
+                }
               >
                 support@campusgo.edu
               </Text>
@@ -269,7 +330,8 @@ export default function HomeScreen() {
               <Text style={styles.contactIcon}>{"\u2799"}</Text>
               <Text style={styles.contactTitle}>Physical Location</Text>
               <Text style={styles.contactText}>
-                8863+P9J, Capitol Area, Kagawasan Avenue, Dumaguete City, 6200 Negros Oriental
+                8863+P9J, Capitol Area, Kagawasan Avenue, Dumaguete City, 6200
+                Negros Oriental
               </Text>
             </View>
           </View>
@@ -281,9 +343,10 @@ export default function HomeScreen() {
   );
 }
 
-/* 🎨 Styles (unchanged, except keep NAVBAR_HEIGHT consistent) */
+/* 🎨 Styles */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BACKGROUND_COLOR },
+
   navbar: {
     height: NAVBAR_HEIGHT,
     backgroundColor: "#fff",
@@ -296,20 +359,39 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
   },
+
+  // logo + title
+  navLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   navLogo: { width: 40, height: 40 },
   navTitle: {
     fontWeight: "800",
     color: PRIMARY_COLOR,
     fontSize: 20,
-    flex: 1,
     marginLeft: 10,
   },
-  navLinks: { flexDirection: "row", alignItems: "center", gap: 25 },
-  navLink: { color: "#374151", fontWeight: "600", fontSize: 15 },
+
+  // Wide screen: links + login inline
+  navLinksWide: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 25,
+  },
+
+  // Mobile: whole right part scrolls
+  navRightScroll: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 8,
+  },
+
+  navLink: { color: "#374151", fontWeight: "600", fontSize: 15, marginRight: 16 },
   navButton: {
     backgroundColor: PRIMARY_COLOR,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 8,
     elevation: 3,
     shadowColor: PRIMARY_COLOR,
@@ -317,7 +399,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
-  navButtonText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  navButtonText: { color: "#fff", fontWeight: "700", fontSize: 14 },
 
   scroll: { flex: 1 },
   scrollContent: {
@@ -346,11 +428,24 @@ const styles = StyleSheet.create({
   },
   logo: { width: 120, height: 120, marginBottom: 10 },
   appName: { fontSize: 36, fontWeight: "800", color: "#FFFFFF" },
-  slogan: { fontSize: 15, color: "rgba(255, 255, 255, 0.9)", fontStyle: "italic" },
+  slogan: {
+    fontSize: 15,
+    color: "rgba(255, 255, 255, 0.9)",
+    fontStyle: "italic",
+  },
 
   section: { width: "100%", maxWidth: 1100, marginBottom: 50 },
-  sectionHeader: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
-  sectionTitle: { fontSize: 22, fontWeight: "700", color: PRIMARY_COLOR, marginLeft: 10 },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: PRIMARY_COLOR,
+    marginLeft: 10,
+  },
   icon: { fontSize: 22, color: PRIMARY_COLOR },
 
   cardGrid: {
@@ -373,9 +468,19 @@ const styles = StyleSheet.create({
     marginBottom: Platform.OS === "web" ? 0 : 20,
   },
   cardIcon: { fontSize: 24, marginBottom: 8, color: PRIMARY_COLOR },
-  cardTitle: { fontSize: 17, fontWeight: "700", color: "#111827", marginBottom: 4 },
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 4,
+  },
   cardText: { fontSize: 14, color: "#4B5563" },
-  cardTag: { fontSize: 12, fontWeight: "700", marginBottom: 8, color: PRIMARY_COLOR },
+  cardTag: {
+    fontSize: 12,
+    fontWeight: "700",
+    marginBottom: 8,
+    color: PRIMARY_COLOR,
+  },
   orangeCard: { borderTopWidth: 3, borderTopColor: "#F59E0B" },
   greenCard: { borderTopWidth: 3, borderTopColor: ACCENT_COLOR },
   blueCard: { borderTopWidth: 3, borderTopColor: "#3B82F6" },
@@ -388,7 +493,44 @@ const styles = StyleSheet.create({
     borderLeftColor: PRIMARY_COLOR,
     elevation: 3,
   },
-  paragraph: { fontSize: 15, color: "#374151", lineHeight: 22, textAlign: "justify" },
+  paragraph: {
+    fontSize: 15,
+    color: "#374151",
+    lineHeight: 22,
+    textAlign: "justify",
+  },
+
+  /* Extra Login CTA */
+  loginCtaCard: {
+    backgroundColor: "#EEF2FF",
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "#CBD5F5",
+    alignItems: "flex-start",
+  },
+  loginCtaTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: PRIMARY_COLOR,
+    marginBottom: 6,
+  },
+  loginCtaText: {
+    fontSize: 14,
+    color: "#374151",
+    marginBottom: 12,
+  },
+  loginCtaButton: {
+    backgroundColor: PRIMARY_COLOR,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 999,
+  },
+  loginCtaButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+  },
 
   contactGrid: {
     flexDirection: "row",

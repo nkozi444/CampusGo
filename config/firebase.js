@@ -3,7 +3,6 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBROiDalp_KLwaKvUCwpdgDfJUjDmYl908",
   authDomain: "campusgo-57be2.firebaseapp.com",
